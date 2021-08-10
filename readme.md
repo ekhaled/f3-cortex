@@ -1,3 +1,6 @@
+# This is a forked version of the original repository implementing a patch that brings back php 5.4 compatibility.
+This fork will be decommissioned as soon as the relevant PR is merged into the original repo
+
 ![Cortex](https://ikkez.de/linked/cortex_icon.png)
 ***
 
@@ -13,10 +16,10 @@ Cortex is a multi-engine ActiveRecord ORM / ODM that offers easy object persiste
   - Support for models and collections
   - Relationships: link multiple models together to one-to-one, one-to-many and many-to-many associations
   - smart-loading of related models (intelligent lazy and eager-loading with zero configuration)
-  - useful methods for nested filtering through relations 
+  - useful methods for nested filtering through relations
   - lots of event handlers and custom setter / getter preprocessors for all fields
   - define default values and nullable fields for NoSQL
-  - additional [validation plugin](https://github.com/ikkez/f3-validation-engine) available 
+  - additional [validation plugin](https://github.com/ikkez/f3-validation-engine) available
 
 With Cortex you can create generic apps, that work with any DB of the users choice, no matter if it's SQlite, PostgreSQL, MongoDB or even none.
 You can also mash-up multiple engines or use them simultaneously.
@@ -60,7 +63,7 @@ It's great for fast and easy data abstraction and offers a bunch of useful filte
 11. [Known Issues](#known-issues)
 12. [Roadmap](#roadmap)
 13. [License](#license)
-    
+
 
 ## Quick Start
 
@@ -83,9 +86,9 @@ Create a DB object of your choice. You can choose between [SQL](http://fatfreefr
 $db = new \DB\SQL('mysql:host=localhost;port=3306;dbname=MyAppDB','user','pw');
 // SQL - SQlite
 $db = new \DB\SQL('sqlite:db/database.sqlite');
-// SQL - PostgreSQL 
+// SQL - PostgreSQL
 $db = new \DB\SQL('pgsql:host=localhost;dbname=MyAppDB','user','pw');
-// SQL - SQL Server 
+// SQL - SQL Server
 $db = new \DB\SQL('sqlsrv:SERVER=LOCALHOST\SQLEXPRESS2012;Database=MyAppDB','user','pw');
 // Jig
 $db = new \DB\Jig('data/');
@@ -229,7 +232,7 @@ class User extends \DB\Cortex {
 }
 ```
 
-In the `$fieldConf` array, you can set data types (`type`), `nullable` flags and `default` values for your columns. With `index` and `unique`, you can even setup an index for the columns. Doing so enables you to install new Models into your SQL database, adds some nullable validation checks and the ability for defaults to NoSQL engines. This makes your models easy interchangeable along various databases using this loosely coupled field definitions. 
+In the `$fieldConf` array, you can set data types (`type`), `nullable` flags and `default` values for your columns. With `index` and `unique`, you can even setup an index for the columns. Doing so enables you to install new Models into your SQL database, adds some nullable validation checks and the ability for defaults to NoSQL engines. This makes your models easy interchangeable along various databases using this loosely coupled field definitions.
 
 **You don't need to configure all fields this way.** If you're working with existing tables, the underlying SQL Mapper exposes the existing table schema. So if you don't need that auto-installer feature, you can just skip the configuration for those fields, or just setup only those you need (i.e. for fields with relations).
 
@@ -317,7 +320,7 @@ If your Model has a valid field configuration, you are able to run this installa
 
 ```php
 \Model\User::setup();
-``` 
+```
 
 If you have no model class, you need to provide all of the setup method's parameters.
 
@@ -328,12 +331,12 @@ $fields = [
     'website' => ['type' => \DB\SQL\Schema::DT_INT4],
 ];
 \DB\Cortex::setup($db, 'users', $fields);
-``` 
+```
 
 
 ### Set down
 
-This method completely removes the specified table from the used database. So handle with care. 
+This method completely removes the specified table from the used database. So handle with care.
 
 ```php
 // With Model class
@@ -341,7 +344,7 @@ This method completely removes the specified table from the used database. So ha
 
 // Without Model class
 \DB\Cortex::setdown($db, 'users');
-``` 
+```
 
 
 ## Relations
@@ -496,13 +499,13 @@ $author->load(['_id = ?', 2]);
 $profile = new ProfileModel();
 $profile->status_message = 'Hello World';
 
-// link author and profile together, just set the foreign model to the desired property 
+// link author and profile together, just set the foreign model to the desired property
 $profile->author = $author;
- 
-// OR you can also just put in the id instead of the whole object here 
+
+// OR you can also just put in the id instead of the whole object here
 // (means you don't need to load the author model upfront at all)
 $profile->author = 23;
- 
+
 $profile->save();
 ```
 
@@ -585,9 +588,9 @@ $news->tags[] = $tag;
 
 $news->save();
 ```
- 
+
 Now you can get all tags of a news entry:
- 
+
 ```php
 $news->load(['_id = ?',1]);
 echo $news->tags[0]['title']; // Web Design
@@ -643,7 +646,7 @@ In case you want to bind a many-to-many relation to itself, meaning that you'd l
     </tr>
 </table>
 
-A common scenario is where a `User` has friends and that relation target is also `User`. So it would bind the relation to itself: 
+A common scenario is where a `User` has friends and that relation target is also `User`. So it would bind the relation to itself:
 
 ```php
 namespace Model;
@@ -672,7 +675,7 @@ Because this is also a many to many relation, a pivot table is needed too. Its n
 
 Usually, this is a bidirectional relation, meaning that you would get a direct linkage to your friends (`friends`), and another one to the inverse linkage (friends with me, `friends_ref`). As this is pretty inconvenient for further working and filtering on those, both
 fields are linked together internally and will always represent **all** relations, whether the relation was added from UserA or UserB.
-  
+
 ```php
 $userA = new \Model\User();
 $userA->load(['_id = ?', 1]);
@@ -685,15 +688,15 @@ $userC->load(['_id = ?', 3]);
 
 if ($userA->friends)
 	$userA[] = $userB;
-else 
+else
 	$userA = [$userB];
-	
+
 $userA->save();
 
 $userC->friends = [$userA,$userB];
 $userC->save();
 ```
-  
+
 The only exception is, that the current record itself is always excluded, so you wont get UserA as friend of UserA:
 
 ```php
@@ -704,7 +707,7 @@ $userB->friends->getAll('_id'); // [1,3]
 $userC->load(['_id = ?', 3]);
 $userC->friends->getAll('_id'); // [1,2]
 ```
-  
+
 
 ## Event Handlers
 
@@ -729,18 +732,18 @@ You can setup own handlers to this events like this:
 $mapper->onload(function($self){
 	// custom code
 });
-// or 
+// or
 $mapper->onload('App/Foo/Bar::doSomething');
 ```
 
 You can provide anything that is accepted by the [Base->call](http://fatfreeframework.com/base#call) method as handler function. Notice to use the `$self->set('field','val')` instead of `$self->field=val`, if you define a handler within a child class of Cortex (i.e. an extended `__construct` in your own model class).
 
-If any `before*` event returns a `false` result, the action that is going to be performed will be aborted, and the `after*` events are skipped. 
+If any `before*` event returns a `false` result, the action that is going to be performed will be aborted, and the `after*` events are skipped.
 
 ### Custom Field Handler
 
 The `onset` and `onget` events have slightly different parameters:
- 
+
 ```php
 $mapper->onset('field',function($self, $val){
 	return md5($val);
@@ -752,7 +755,7 @@ You can also define these custom field preprocessors as a method within the clas
 ```php
 class User extends \DB\Cortex {
     // [...]
-        
+
     // validate email address
     public function set_mail($value) {
         if (\Audit::instance()->email($value) == false) {
@@ -761,14 +764,14 @@ class User extends \DB\Cortex {
             $value = null;
         }
         return $value;
-    }    
+    }
     // hash a password before saving
     public function set_password($value) {
         return \Bcrypt::instance()->hash($value);
-    } 
+    }
     public function get_name($value) {
         return ucfirst($value);
-    }  
+    }
 }
 ```
 
@@ -789,7 +792,7 @@ Well basically the `$filter` syntax for writing cortex queries is simple SQL. Bu
 
 ### Operators
 
-These common filter operators are supported: 
+These common filter operators are supported:
 - relational operators: `<`, `>`, `<=`, `>=`, `==`, `=`, `!=`, `<>`
 - search operators: `LIKE`,`NOT LIKE`, `IN`, `NOT IN` (not case-sensitive)
 - logical operators: `(`, `)`, `AND`, `OR`, `&&`, (`||` only mysql and jig)
@@ -797,15 +800,15 @@ These common filter operators are supported:
 **Comparison**
 
 With comparison operators, you can do the following things:
- 
+
 *  compare fields against other fields:
 
 	`['foo < bar']`
-	
+
 *  compare fields against values:
 
 	`['foo >= 1']` or `['foo == \'bar\'']`
-	
+
 Especially for value comparison, it's **highly recommended** to use placeholders in your filter and bind their values accordingly. This ensures that the data mapper uses parameterized queries for better security. Placeholders go like this:
 
 *  positional bind-parameters:
@@ -817,7 +820,7 @@ Especially for value comparison, it's **highly recommended** to use placeholders
 	`['foo = :foo',':foo'=>1]`
 
 	`['foo = :foo AND bar < :bar',':foo'=>'hallo', ':bar'=>7]`
-	
+
 **Sugar**
 
 *  what's a special sugar in Cortex is, that you can also mix both types together:
@@ -841,9 +844,9 @@ Especially for value comparison, it's **highly recommended** to use placeholders
 *  The `IN` operator usually needs multiple placeholders in raw PDO (like `foo IN (?,?,?)`). In Cortex queries you simply use an array for this, the QueryParser does the rest.
 
 	`['foo IN ?', [1,2,3]]`
-	
+
 	You can also use a CortexCollection as bind parameter. In that case, the primary keys are automatically used for matching:
-	
+
 	```php
 	$fruits = $fruitModel->find(['taste = ?','sweet']);
 	$result = $userModel->find(['favorite_fruit IN ?',$fruits])
@@ -876,7 +879,7 @@ Given the following field configuration:
 'contracts' => ['has-many' => [ContractsModel::class,'user']]
 ```
 
-This example will paginate through all contracts records that are sorted by the relational user name: 
+This example will paginate through all contracts records that are sorted by the relational user name:
 
 ```php
 $contracts = new Contracts();
@@ -983,10 +986,10 @@ $user->virtual('full_name', function($this) {
 });
 ```
 
-You can also use this to count or sum fields together and even reorder your collection on this fields using `$collection->orderBy('foo DESC, bar ASC')`. Keep in mind that these virtual fields only applies to your final received collection - you cannot use these fields in your filter query or sort condition before the actual find. 
+You can also use this to count or sum fields together and even reorder your collection on this fields using `$collection->orderBy('foo DESC, bar ASC')`. Keep in mind that these virtual fields only applies to your final received collection - you cannot use these fields in your filter query or sort condition before the actual find.
 
 But if you use a SQL engine, you can use the underlying mapper abilities of virtual adhoc fields - just set this before any load or find operation is made:
- 
+
 ```php
 $mapper->newField = 'SQL EXPRESSION';
 ```
@@ -995,7 +998,7 @@ $mapper->newField = 'SQL EXPRESSION';
 
 ### $db
 **DB object**
- 
+
 Can be an object of [\DB\SQL](http://fatfreeframework.com/sql), [\DB\Jig](http://fatfreeframework.com/jig) or [\DB\Mongo](http://fatfreeframework.com/sql),
 *OR* a string containing a HIVE key where the actual database object is stored at.
 
@@ -1026,8 +1029,8 @@ protected $fieldConf = [
 
 Get the whole list of possible types from the [Data Types Table](https://github.com/ikkez/f3-schema-builder/tree/master#column-class).
 
-*NB:* You can also add `'passThrough' => true` in order to use the raw value in *type* as data type in case you need a custom type which is not available in the data types table. 
- 
+*NB:* You can also add `'passThrough' => true` in order to use the raw value in *type* as data type in case you need a custom type which is not available in the data types table.
+
 ### $ttl
 **default mapper schema ttl**, int = 60
 
@@ -1041,7 +1044,7 @@ This setting in your model will add a caching to all relational queries
 ### $primary
 **SQL table primary key**, string
 
-Defines the used primary key of the table. Default is `id` for SQL engine, and *always* `_id` for JIG and Mongo engines. 
+Defines the used primary key of the table. Default is `id` for SQL engine, and *always* `_id` for JIG and Mongo engines.
  The setup method respects this value for creating new SQL tables in your database and has to be an integer column.
 
 ### load
@@ -1108,7 +1111,7 @@ array cast ([ Cortex $obj = NULL [, int $rel_depths = 1]])
 
 > NB: Since configuring *relations depths* seems more and more less practical, a new way of casting relations was introducted: "Field masks". This is the way to go and will replace the legacy "relations depths configuration" in a future release.
 
- 
+
 You can also use ``$rel_depths`` for defining a mask to mappers, so you can restrict the fields returned from a cast:
 
 ```php
@@ -1150,7 +1153,7 @@ var_dump($user->cast());
 ```
 
 If you increase the `$rel_depths` value, you can also resolve further relations down the road:
- 
+
 ```php
 var_dump($user->cast(NULL, 2));
 /* Array (
@@ -1161,7 +1164,7 @@ var_dump($user->cast(NULL, 2));
             [post] => Array(
                 [_id] => 2
                 [title] => Kittenz
-                [text] => ... 
+                [text] => ...
             )
             [message] => Foo Bar
         ),
@@ -1176,7 +1179,7 @@ If you only want particular relation fields to be resolved, you can set an array
 
 ```php
 $user->cast(NULL, [
-  '*' => 0,     // cast all own relations to the given depth, 
+  '*' => 0,     // cast all own relations to the given depth,
                 // 0 doesn't cast any relation (default if this key is missing)
   'modelA' => 0,// if a relation key is defined here, modelA is being loaded and casted,
                 // but not its own relations, because the depth is 0 for it
@@ -1184,14 +1187,14 @@ $user->cast(NULL, [
   'modelC' => [...] // you can recursively extend this cast array scheme
 ]);
 
-// simple sample: only cast yourself and the author model without its childs 
+// simple sample: only cast yourself and the author model without its childs
 $news->cast(NULL,[
     '*'=>0,
     'author'=>0
 ]);
 
-// nested sample: only cast yourself, 
-// your own author relation with its profile and all profile relations 
+// nested sample: only cast yourself,
+// your own author relation with its profile and all profile relations
 $news->cast(NULL,[
     '*'=>0,
     'author'=>[
@@ -1203,7 +1206,7 @@ $news->cast(NULL,[
 
 If you don't want any relation to be resolved and casted, just set `$rel_depths` to `0`.
 Any one-to-many relation field then just contains the `_id` (or any other custom field binding from [$fieldConf](#fieldConf)) of the foreign record,
-many-to-one and many-to-many fields are just empty. 
+many-to-one and many-to-many fields are just empty.
 
 
 ### castField
@@ -1255,7 +1258,7 @@ $news_records = $news->findByRawSQL('SELECT * from news where foo <= ? and activ
 Cortex|false findone([ array $filter = NULL [, array $options = NULL [, int $ttl = 0 ]]])
 ```
 
-This method is inherited from the [Cursor](http://fatfreeframework.com/cursor) class. 
+This method is inherited from the [Cursor](http://fatfreeframework.com/cursor) class.
 
 ### afind
 **Return an array of result arrays matching criteria**
@@ -1264,7 +1267,7 @@ This method is inherited from the [Cursor](http://fatfreeframework.com/cursor) c
 array|null find([ array $filter = NULL [, array $options = NULL [, int $ttl = 0 [, int|array $rel_depths = 1 ]]]])
 ```
 
-Finds a whole collection, matching the criteria and casts all mappers into an array, based on the `$rel_depths` configuration. 
+Finds a whole collection, matching the criteria and casts all mappers into an array, based on the `$rel_depths` configuration.
 
 
 ### addToCollection
@@ -1327,7 +1330,7 @@ Removes only the given `$key` filter or all, if none was given.
 null compare( array $fields, callback $new [, callback $old = null ])
 ```
 
-This method compares new data in form of an assoc array of [field => value] against the initial field values and 
+This method compares new data in form of an assoc array of [field => value] against the initial field values and
 calls a callback functions for *$new* and *$old* values, which can be used to prepare new / cleanup old data.
 
 Updated fields are set, the *$new* callback MUST return a value.
@@ -1346,7 +1349,7 @@ $this->model->compare($uploads,function($filepath) {
 });
 ```
 
-In the example above, we handle multiple fields and compare their values with an incoming array for new data. For each new field value or changed / added array item value, the `$new` function is called. For existing data, that's not present in the new data anymore, the `$old` function is called. 
+In the example above, we handle multiple fields and compare their values with an incoming array for new data. For each new field value or changed / added array item value, the `$new` function is called. For existing data, that's not present in the new data anymore, the `$old` function is called.
 
 ### copyfrom
 **Hydrate the mapper from hive key or given array**
@@ -1355,11 +1358,11 @@ In the example above, we handle multiple fields and compare their values with an
 null copyfrom( string|array $key [, callback|array|string $fields = null ])
 ```
 
-Use this method to set multiple values to the mapper at once. 
+Use this method to set multiple values to the mapper at once.
 The `$key` parameter must be an array or a string of a hive key, where the actual array can be found.
 
 The `$fields` parameter can be a splittable string:
- 
+
 ```php
 $news->copyfrom('POST','title;text');
 ```
@@ -1485,7 +1488,7 @@ When a `$filter` parameter is set, it deletes all matching records:
 ```php
 $user->erase(['deleted = ?', 1]);
 ```
- 
+
 It deletes the loaded record when called on a hydrated mapper without `$filter` parameter:
 
 ```php
@@ -1493,7 +1496,7 @@ $user->load(['_id = ?',6]);
 $user->erase();
 ```
 
-This also calls the `beforeerase` and `aftererase` events.  
+This also calls the `beforeerase` and `aftererase` events.
 
 ### exists
 **Check if a certain field exists in the mapper or is a virtual relation field**
@@ -1526,7 +1529,7 @@ var_dump( $user->fields() );
 )*/
 ```
 
-If you set a `$fields` array, it'll enable the field whitelisting, and put the given fields to that whitelist. 
+If you set a `$fields` array, it'll enable the field whitelisting, and put the given fields to that whitelist.
 All non-whitelisted fields on loaded records are not available, visible nor accessible anymore. This is useful when you don't want certain fields in a returned casted array.
 
 ```php
@@ -1542,8 +1545,8 @@ var_dump($user->cast());
 
 Calling this method will re-initialize the mapper and takes effect on any further load or find action, so run this first of all.
 
-If you set the `$exclude` parameter to `true`, it'll also enable the whitelisting, but set all available fields, without the given, to the whitelist. 
-In other words, the given $fields become blacklisted, the only the remaining fields stay visible. 
+If you set the `$exclude` parameter to `true`, it'll also enable the whitelisting, but set all available fields, without the given, to the whitelist.
+In other words, the given $fields become blacklisted, the only the remaining fields stay visible.
 
 ```php
 $user->fields(['email'], true); // all fields, but not these
@@ -1572,7 +1575,7 @@ var_dump($comments->cast());
         'username' => joe358
         'active' => 1
         'deleted' => 0
-    ) 
+    )
 )*/
 ```
 
@@ -1673,7 +1676,7 @@ $new_filter = $mapper->mergeFilter([$filter1, $filter2]);
 array paginate([ int $pos = 0 [, int $size = 10 [, array $filter = NULL [, array $options = NULL [, int $ttl = 0 ]]]]])
 ```
 
-See [Cursor->paginate](http://fatfreeframework.com/cursor#paginate). Any *has* and *filter* filters can be used in conjunction with paginate as well. 
+See [Cursor->paginate](http://fatfreeframework.com/cursor#paginate). Any *has* and *filter* filters can be used in conjunction with paginate as well.
 
 
 ### rel
@@ -1688,7 +1691,7 @@ For instance, if `comments` is a one-to-many relation to `\Model\Comment`:
 ```php
 $user->load();
 var_dump($user->comments); // array of comments
-$new_comment = $user->rel('comments'); 
+$new_comment = $user->rel('comments');
 // $new_comment is a new empty \Model\Comment
 ```
 
@@ -1743,7 +1746,7 @@ $user->email = 'webmaster@domain.com';
 $user->save(); // update
 ```
 
-The save method also fires the `beforeinsert`, `beforeupdate`, `afterinsert` and `afterupdate` events. 
+The save method also fires the `beforeinsert`, `beforeupdate`, `afterinsert` and `afterupdate` events.
 There are also `insert`and `update`method, but using that methods directly, will skip the events and any cascading actions.
 
 
@@ -1761,7 +1764,7 @@ mixed set( string $key, mixed $val )
 null setdown([ object|string $db = null [, string $table = null ]])
 ```
 
-This method completely drops the own table, and used many-to-many pivot-tables from the database. 
+This method completely drops the own table, and used many-to-many pivot-tables from the database.
 
 
 ### setFieldConfiguration
@@ -1781,8 +1784,8 @@ Used to set the **$fieldConf** array.
 bool setup([ object|string $db = null [, string $table = null [, array $fields = null ]]])
 ```
 
-This method creates the needed tables for the model itself and additionally required pivot tables. It uses the internal model properties *$db*, *$table* and *fieldConf*, 
-but can also be fed with method parameters which would take precedence. 
+This method creates the needed tables for the model itself and additionally required pivot tables. It uses the internal model properties *$db*, *$table* and *fieldConf*,
+but can also be fed with method parameters which would take precedence.
 
 
 ### touch
@@ -1881,7 +1884,7 @@ Use the `$reldepths` parameter to define what to cast, see [cast](#cast) method 
 array compare( array|CortexCollection $stack [, string $cpm_key = '_id'])
 ```
 
-This method is useful to compare the current collection with another collection or a list of values that is checked for existence in the collection records. 
+This method is useful to compare the current collection with another collection or a list of values that is checked for existence in the collection records.
 
 In example you got a relation collection that is about to be updated and you want to know which records are going to be removed or would be new in the collection:
 
@@ -1898,10 +1901,10 @@ if (isset($res['new'])) {
 }
 ```
 
-The compare result `$res` is an array that can contain the array keys `old` and `new`, which both represent an array of `$cpm_key` values.  
+The compare result `$res` is an array that can contain the array keys `old` and `new`, which both represent an array of `$cpm_key` values.
 
 NB: This is just a comparison - it actually does not update any of the collections. Add a simple `$user->friends = $newFriendIds;` after comparison to update the collection.
- 
+
 
 ### contains
 **check if the collection contains a record with the given key-val set**
@@ -1955,7 +1958,7 @@ You can fetch all values of a certain key from all containing mappers using `get
 
 ```php
 $users = $user->find(['active = ?',1]);
-$mails = $users->getAll('email'); 
+$mails = $users->getAll('email');
 /* Array(
     'user1@domain.com',
     'user2@domain.com',
@@ -1972,14 +1975,14 @@ array getBy( string $index [, bool $nested = false ])
 
 You can transpose the results by a defined key using `getBy()`.
 Therefore you need to provide an existing field in the mapper, like this;
- 
+
 ```php
 $pages = $page->find();
 $pages_by_slug = $pages->getBy('slug');
 ```
- 
+
 This will resort the resulting array by the email field of each mapper, which gives you a result array like `array("foo@domain.com"=>array(...))`. If you provide `true` as 2nd argument, the records are ordered into another array depth, to keep track of multiple results per key.
- 
+
 ### hasChanged
 **returns true if any model was modified after it was added to the collection**
 
@@ -2004,7 +2007,7 @@ If you need to re-sort a result collection once more to another key, use this me
 array setModels( array $models [, bool $init = true ])
 ```
 
-This adds multiple Cortex objects to the own collection. When `$init` is `true`, added models with this method wont effect the **changed** state. 
+This adds multiple Cortex objects to the own collection. When `$init` is `true`, added models with this method wont effect the **changed** state.
 
 ### slice
 **slice the collection**
@@ -2039,7 +2042,7 @@ This removes a part from the collection.
 
 	* `CORTEX.smartLoading`: triggers the intelligent-lazy-eager-loading. Default is `TRUE`, but turn it off if you think something works wrong. Could cause a lot of extra queries send to your DB, if deactivated.
 
-	* `CORTEX.standardiseID`: Default `TRUE`. This moves any defined primary key into the `_id` field on returned arrays. 
+	* `CORTEX.standardiseID`: Default `TRUE`. This moves any defined primary key into the `_id` field on returned arrays.
 
 	* `CORTEX.quoteConditions`: Default `TRUE`. By default, all field names in where conditions are quoted automatically according to the used database engine. This helps to work around reserved names in SQL. However the detection of fields isn't perfect yet, so in case you want to add the correct backticks or other quotation yourself, set this to `FALSE`.
 
@@ -2066,6 +2069,6 @@ License
 -
 
 GPLv3
-  
 
-    
+
+
